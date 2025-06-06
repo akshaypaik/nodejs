@@ -19,6 +19,9 @@
 # Chakra - Microsoft
 # JS Core - Safari
 
+# How require works!
+# check sum.js file to know the details
+
 
 
 
