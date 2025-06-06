@@ -4,7 +4,7 @@
 // Steps that happens when you do require("./path");
 // Step 1. Resolving the module -> ./localpath or .json or node module (third party package)
 // Step 2. Loading the module -> file is loaded according to file type
-// Step 3. Wraps inside IIFE
+// Step 3. Compile - Wraps inside IIFE
 // Step 4. Evaluation
 // Step 4. Caching
 
