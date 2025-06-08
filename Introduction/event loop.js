@@ -10,6 +10,7 @@ process.nextTick(() => {
     console.log("nexTick one");
 });
 
+// [IMPORTANT]
 // In esm module promise is priority over nextTick.
 // In commonjs module nextTick is priority over promise
 const promise = new Promise(resolve => resolve("promise"));
