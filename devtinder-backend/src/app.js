@@ -99,6 +99,31 @@ app.post("/signup", async (req, res) => {
 
 });
 
+app.post("/login", async (req, res) => {
+
+    try {
+
+        const { emailId, password } = req.body;
+
+        const dbResponse = await User.findOne({ emailId: emailId });
+
+        if (!dbResponse) {
+            throw new Error("Invalid credentials!");
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, dbResponse.password);
+
+        if (!isPasswordValid) {
+            throw new Error("Invalid credentials!");
+        }
+
+        res.send("User logged in successfully");
+    } catch (error) {
+        res.status(500).send("User login failed. Error: " + error.message);
+    }
+
+});
+
 app.use("/", (err, req, res, next) => {
     if (err) {
         res.status(500).send("Something went wrong");
