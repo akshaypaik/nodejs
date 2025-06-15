@@ -3,12 +3,17 @@ const { connectDB } = require("./config/database");
 const User = require("./models/user");
 const { validateSignUpData } = require("./utils/validation");
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const { userAuth } = require("./middlewares/auth")
 
 const PORT = 4002;
 
 const app = express();
 
+// json parser
 app.use(express.json());
+// cookies
+app.use(cookieParser());
 
 connectDB().then(() => {
     console.log("DB connection established!");
@@ -105,22 +110,40 @@ app.post("/login", async (req, res) => {
 
         const { emailId, password } = req.body;
 
-        const dbResponse = await User.findOne({ emailId: emailId });
+        const user = await User.findOne({ emailId: emailId });
 
-        if (!dbResponse) {
+        if (!user) {
             throw new Error("Invalid credentials!");
         }
 
-        const isPasswordValid = await bcrypt.compare(password, dbResponse.password);
+        const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (!isPasswordValid) {
             throw new Error("Invalid credentials!");
         }
 
+        const token = await user.getJWT();
+
+        res.cookie('token', token);
+
         res.send("User logged in successfully");
     } catch (error) {
         res.status(500).send("User login failed. Error: " + error.message);
     }
+
+});
+
+app.get("/profile", userAuth, async (req, res) => {
+
+    try {
+
+        const { user } = req;
+
+        res.send(`Logged in user: ${user}`);
+    } catch (error) {
+        res.status(500).send("Error fetching user profile. Error: " + error.message);
+    }
+
 
 });
 
