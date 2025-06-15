@@ -16,4 +16,17 @@ const validateSignUpData = (req) => {
 
 }
 
-module.exports = { validateSignUpData };
+const validateEditProfileData = (req) => {
+    const data = req.body;
+    const allowedEditFields = ["firstName", "lastName", "photoURL", "gender", "age", "about", "skills"];
+    const isEditAllowed = Object.keys(data).every((key) => allowedEditFields.includes(key));
+    if (!isEditAllowed) {
+        throw new Error("Edit not allowed");
+    }
+    if (data?.skills.length > 10) {
+        throw new Error("Skills cannot be more than 10");
+    }
+    return isEditAllowed;
+}
+
+module.exports = { validateSignUpData, validateEditProfileData };
