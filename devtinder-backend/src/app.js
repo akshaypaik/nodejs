@@ -17,6 +17,55 @@ connectDB().then(() => {
     console.error("DB cannot be connected! ERROR: ", error);
 });
 
+app.post("/user", async (req, res) => {
+    const userEmailId = req.body.emailId;
+    try {
+        const response = await User.find({ emailId: userEmailId });
+        if (response.length === 0) {
+            res.status(200).send("User not found. please signup");
+        }
+        res.send(response);
+    } catch (error) {
+        res.status(500).send("Error fetching user. Error: " + error.message);
+    }
+});
+
+app.delete("/user", async (req, res) => {
+    const userId = req.body.userId;
+    try {
+        const response = await User.findByIdAndDelete(userId);
+        res.status(200).send("User deleted successfully");
+    } catch (error) {
+        res.status(500).send("Error deleting user. Error: " + error);
+    }
+});
+
+app.patch("/user", async (req, res) => {
+    const userId = req.body.userId;
+    const data = req.body;
+    try {
+        const response = await User.findByIdAndUpdate(userId, data, { runValidators: true });
+        res.status(200).send("User updated successfully");
+    } catch (error) {
+        res.status(500).send("Error updating user. Error: " + error);
+    }
+});
+
+// Feed API - GET /feed - get all users from db
+app.get("/feed", async (req, res) => {
+    try {
+        const response = await User.find({});
+        if (response.length === 0) {
+            res.status(200).send("User not found. please signup");
+        }
+
+        res.send(response);
+
+    } catch (error) {
+        res.status(500).send("Error fetching user. Error: " + error.message);
+    }
+});
+
 app.post("/signup", async (req, res) => {
     const userObj = req.body;
     const user = new User(userObj);
@@ -25,7 +74,7 @@ app.post("/signup", async (req, res) => {
         await user.save();
         res.send("User added successfully");
     } catch (error) {
-        res.status(500).send("User addition failed. Error: ", error.message);
+        res.status(500).send("User saving user. Error: " + error.message);
     }
 
 });
