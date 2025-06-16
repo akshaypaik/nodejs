@@ -36,7 +36,7 @@ connectionRequestsRouter.post("/request/send/:status/:toUserId", userAuth, async
 
         const toUserInfo = await User.findById(toUserId);
 
-        if(!toUserInfo){
+        if (!toUserInfo) {
             return res.status(401).send(`User to which you are sending request doesnot exist`);
         }
 
@@ -50,6 +50,41 @@ connectionRequestsRouter.post("/request/send/:status/:toUserId", userAuth, async
 
     } catch (error) {
         res.status(400).send("ERROR: " + error?.message);
+    }
+
+});
+
+connectionRequestsRouter.post("/request/review/:status/:requestId", userAuth, async (req, res) => {
+
+    const allowedStatus = ["accepted", "rejected"];
+    const { status, requestId } = req.params;
+    const { user } = req;
+
+    try {
+        if (!allowedStatus.includes(status)) {
+            throw new Error("Invalid status type");
+        }
+
+        const connectionRequest = await ConnectionRequest.findOne({
+            toUserId: user._id,
+            _id: requestId,
+            status: "interested"
+        });
+
+        if(!connectionRequest){
+            return res.status(400).json({
+                message: `Connection request not found`
+            })
+        }
+
+        connectionRequest.status = status;
+
+        await connectionRequest.save();
+
+        res.send("Accepted connection request successfully");
+
+    } catch (error) {
+        res.status(400).send(`ERROR: ${error?.message}`);
     }
 
 });
