@@ -1,5 +1,7 @@
 const express = require("express");
 const User = require("../models/user");
+const { userAuth } = require("../middlewares/auth");
+const ConnectionRequest = require("../models/connectionRequest");
 
 const userRouter = express.Router();
 
@@ -60,6 +62,26 @@ userRouter.get("/feed", async (req, res) => {
     } catch (error) {
         res.status(500).send("Error fetching user. Error: " + error.message);
     }
+});
+
+userRouter.get("/user/requests/received", userAuth, async (req, res) => {
+
+    const { user } = req;
+
+    try {
+        const connectionRequest = await ConnectionRequest.find({
+            toUserId: user._id,
+            status: "interested"
+        }).populate("fromUserId", ["firstName", "lastName", "photoURL"]);
+
+        res.send(connectionRequest);
+    } catch (error) {
+        res.send(500).json({
+            message: `Error: ${error?.message}`
+        })
+    }
+
+
 });
 
 
