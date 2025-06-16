@@ -115,4 +115,46 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
 
 });
 
+userRouter.post("/user/feed", userAuth, async (req, res) => {
+    try {
+
+        const USER_SAFE_DATA = "firstName lastName photoURL";
+
+        const { user } = req;
+        const page = parseInt(req.query.page) || 1;
+        let limit = parseInt(req.query.limit) || 10;
+        limit = limit > 50 ? 50 : limit;
+        const skip = (page - 1) * limit;
+
+        const connectionRequest = await ConnectionRequest.find({
+            $or: [
+                { toUserId: user._id },
+                { fromUserId: user._id }
+            ]
+        });
+
+        const hideUserList = new Set();
+
+        connectionRequest.forEach((item) => {
+            hideUserList.add(item.fromUserId);
+            hideUserList.add(item.toUserId);
+        });
+
+        const feedData = await User.find({
+            $and: [
+                { _id: { $nin: Array.from(hideUserList) } },
+                { _id: { $ne: user._id } }
+            ]
+        }).select(USER_SAFE_DATA)
+            .skip(skip)
+            .limit(limit);
+
+        res.send(feedData);
+
+
+    } catch (error) {
+        res.status(500).send("ERROR: " + error.message);
+    }
+});
+
 module.exports = userRouter;
