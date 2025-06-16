@@ -99,7 +99,14 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
             ]
         }).populate("fromUserId", ["firstName", "lastName"]).populate("toUserId", ["firstName", "lastName"]);
 
-        res.send(connections);
+        const data = connections.map(item => {
+            if (item.fromUserId._id.equals(user._id)) {
+                return item.toUserId;
+            }
+            return item.fromUserId;
+        });
+
+        res.send({ data, userId: user._id });
 
     } catch (error) {
         res.status(500).send("ERROR: " + error.message);
